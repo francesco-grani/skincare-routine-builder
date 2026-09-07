@@ -82,9 +82,12 @@ jobs:
             "cd /app && docker compose up --build -d && docker compose ps"
 
       - name: Reload Caddy
-        # The Caddyfile is a bind mount, so `compose up` on its own does not
-        # pick up edits to it — Caddy has to be told to re-read its config or
-        # route changes (including the classified-ads site) sit inert.
+        # The Caddyfile is bind-mounted as a single FILE, so the container is
+        # pinned to that file's inode. rsync writes a temp file and renames it
+        # over the target, creating a new inode — the container keeps reading
+        # the old one, and `caddy reload` then logs "config is unchanged" and
+        # does nothing. Recreating the container re-resolves the mount, so
+        # route changes (including the classified-ads site) actually land.
         run: |
           ssh -i ~/.ssh/deploy_key root@${{ secrets.HETZNER_HOST }} \
-            "cd /app && docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile"
+            "cd /app && docker compose up -d --no-deps --force-recreate caddy"
