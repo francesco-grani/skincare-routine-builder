@@ -80,3 +80,11 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key root@${{ secrets.HETZNER_HOST }} \
             "cd /app && docker compose up --build -d && docker compose ps"
+
+      - name: Reload Caddy
+        # The Caddyfile is a bind mount, so `compose up` on its own does not
+        # pick up edits to it — Caddy has to be told to re-read its config or
+        # route changes (including the classified-ads site) sit inert.
+        run: |
+          ssh -i ~/.ssh/deploy_key root@${{ secrets.HETZNER_HOST }} \
+            "cd /app && docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile"
