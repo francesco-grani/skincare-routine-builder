@@ -17,6 +17,6 @@
 # is the only thing making it reachable. The block lives here because this
 # repo owns /app/Caddyfile — a deploy from here rsyncs over whatever is on the
 # server, so removing this silently takes the ads site down.
-ads.167-233-84-81.sslip.io {
+ads.167-233-84-81.sslip.io, classified.167-233-84-81.sslip.io {
     reverse_proxy classified-ads:3000
 }
